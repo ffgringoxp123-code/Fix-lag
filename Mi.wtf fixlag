@@ -1,1 +1,1 @@
-loadstring(game:HttpGet("https://raw.githubusercontent.com/ffgringoxp123-code/Fix-lag/733d5893ebeb00959bc3deab36d47375c3b9362d/Beta%20fix"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/ffgringoxp123-code/Fix-lag/refs/heads/main/Beta%20fix"))()
