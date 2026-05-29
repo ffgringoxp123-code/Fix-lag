@@ -1,0 +1,157 @@
+Settings = settings().Network
+local PlayerUI = game.Players.LocalPlayer.PlayerGui
+if PlayerUI:FindFirstChild("KittylolLag") ~= nil then
+  PlayerUI.KittylolLag:Destroy()
+end
+local UI = Instance.new("ScreenGui")
+UI.Name = "KittylolLag"
+UI.ResetOnSpawn = false
+UI.IgnoreGuiInset = true
+UI.Parent = PlayerUI
+
+-- Make the GUI draggable
+local dragToggle = nil
+local dragSpeed = 0.25
+local dragStart = nil
+local startPos = nil
+
+local Content = Instance.new("Frame")
+Content.Name = "Content"
+Content.Size = UDim2.fromScale(0.25, 0.3)
+Content.Position = UDim2.fromScale(0.7, 0.35)
+Content.BackgroundColor3 = Color3.fromRGB(255, 182, 193) -- hồng nhạt
+Content.BackgroundTransparency = 0.3 -- trong suốt
+Content.BorderSizePixel = 0
+Content.Active = true
+Content.Parent = UI
+local ContentCorner = Instance.new("UICorner")
+ContentCorner.CornerRadius = UDim.new(0.15, 0)
+ContentCorner.Parent = Content
+local Title = Instance.new("TextLabel")
+Title.Text = "Kittylol Lag"
+Title.Font = Enum.Font.Kalam
+Title.TextColor3 = Color3.fromRGB(255, 20, 147) -- hồng đậm
+Title.BackgroundTransparency = 1
+Title.Size = UDim2.fromScale(1, 0.4)
+Title.Position = UDim2.fromScale(0, 0)
+Title.BorderSizePixel = 0
+Title.TextScaled = true
+Title.Parent = Content
+if game.Lighting:FindFirstChild("KittylolVFX") ~= nil then
+  game.Lighting.KittylolVFX:Destroy()
+end
+local VFX = Instance.new("ColorCorrectionEffect")
+VFX.Saturation = -1
+VFX.Brightness = 0
+VFX.Contrast = 0
+VFX.Name = "KittylolVFX"
+VFX.Enabled = false
+VFX.Parent = game.Lighting
+local Toggler = Instance.new("TextButton")
+Toggler.BackgroundColor3 = Color3.fromRGB(255, 105, 180) -- hồng
+Toggler.Text = "Off"
+Toggler.TextScaled = true
+local TogglerCorner = Instance.new("UICorner")
+TogglerCorner.CornerRadius = UDim.new(0.2, 0)
+TogglerCorner.Parent = Toggler
+Toggler.Font = Enum.Font.Oswald
+Toggler.Size = UDim2.fromScale(1, 0.5)
+Toggler.Position = UDim2.fromScale(0, 0.4)
+Toggler.Parent = Content
+Toggler.TextColor3 = Color3.fromRGB(255, 255, 255)
+local CloseButton = Instance.new("TextButton")
+CloseButton.BackgroundTransparency = 1
+CloseButton.Text = "X"
+CloseButton.TextScaled = true
+CloseButton.Font = Enum.Font.Oswald
+CloseButton.TextColor3 = Color3.fromRGB(255, 50, 50)
+CloseButton.Size = UDim2.fromScale(0.15, 0.2)
+CloseButton.Position = UDim2.fromScale(0.85, 0)
+CloseButton.Parent = Content
+CloseButton.MouseButton1Click:Connect(function()
+  UI:Destroy()
+end)
+
+-- Dragging functionality
+Content.InputBegan:Connect(function(input)
+  if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+    dragToggle = true
+    dragStart = input.Position
+    startPos = Content.Position
+    input.Changed:Connect(function()
+      if input.UserInputState == Enum.UserInputState.End then
+        dragToggle = false
+      end
+    end)
+  end
+end)
+
+Content.InputChanged:Connect(function(input)
+  if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+    if dragToggle then
+      local delta = input.Position - dragStart
+      Content.Position = UDim2.new(
+        startPos.X.Scale,
+        startPos.X.Offset + delta.X,
+        startPos.Y.Scale,
+        startPos.Y.Offset + delta.Y
+      )
+    end
+  end
+end)
+
+-- Resize functionality (kéo góc dưới phải)
+local Resizer = Instance.new("ImageButton")
+Resizer.BackgroundTransparency = 1
+Resizer.Image = "rbxassetid://4312464743" -- resize icon
+Resizer.Size = UDim2.fromScale(0.08, 0.08)
+Resizer.Position = UDim2.fromScale(0.92, 0.92)
+Resizer.Parent = Content
+
+local resizeToggle = false
+local resizeStart = nil
+local resizeStartSize = nil
+
+Resizer.InputBegan:Connect(function(input)
+  if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+    resizeToggle = true
+    resizeStart = input.Position
+    resizeStartSize = Content.Size
+    input.Changed:Connect(function()
+      if input.UserInputState == Enum.UserInputState.End then
+        resizeToggle = false
+      end
+    end)
+  end
+end)
+
+Resizer.InputChanged:Connect(function(input)
+  if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+    if resizeToggle then
+      local delta = input.Position - resizeStart
+      local newX = math.max(0.1, resizeStartSize.X.Scale + delta.X * 0.001)
+      local newY = math.max(0.1, resizeStartSize.Y.Scale + delta.Y * 0.001)
+      Content.Size = UDim2.fromScale(newX, newY)
+    end
+  end
+end)
+
+local IsActive = false
+
+Toggler.MouseButton1Click:Connect(function()
+  Toggler.Interactable = false
+  if IsActive then
+    Toggler.Text = "Off"
+    Toggler.BackgroundColor3 = Color3.fromRGB(255, 105, 180) -- hồng
+    VFX.Enabled = false
+    Settings.IncomingReplicationLag = 0
+    IsActive = false
+  else
+    Toggler.Text = "On"
+    Toggler.BackgroundColor3 = Color3.fromRGB(0, 255, 0) -- xanh khi bật
+    VFX.Enabled = true
+    Settings.IncomingReplicationLag = 1000
+    IsActive = true
+  end
+  Toggler.Interactable = true
+end)
